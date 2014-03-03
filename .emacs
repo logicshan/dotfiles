@@ -10,8 +10,11 @@
  ;; If there is more than one, they won't work right.
  '(column-number-mode t)
  '(haskell-mode-hook (quote (turn-on-haskell-decl-scan turn-on-haskell-indentation)))
+ '(haskell-program-name "ghci")
  '(ido-enable-flex-matching t)
  '(ido-mode (quote both) nil (ido))
+ '(inhibit-startup-screen t)
+ '(initial-frame-alist (quote ((fullscreen . maximized))))
  '(menu-bar-mode nil)
  '(package-archives (quote (("gnu" . "http://elpa.gnu.org/packages/") ("melpa" . "http://melpa.milkbox.net/packages/"))))
  '(package-enable-at-startup nil)
@@ -26,6 +29,26 @@
 
 (when (memq window-system '(x ns))
   (exec-path-from-shell-initialize))
+
+(add-to-list 'load-path "~/.emacs.d/site-lisp/")
+
+(add-to-list 'auto-mode-alist '("\\.m\\'" . miranda-mode))
+
+(autoload 'miranda-mode "miranda-mode"
+                        "Major mode for editing Miranda scripts" t nil)
+
+(load (expand-file-name "~/quicklisp/slime-helper.el"))
+(setq inferior-lisp-program "sbcl")
+
+; packages want to install
+(setq package-list '(exec-path-from-shell grep-a-lot haskell-mode tuareg caml))
+; fetch the list of packages available
+(unless package-archive-contents
+  (package-refresh-cotents))
+; install the missing packages
+(dolist (package package-list)
+  (unless (package-installed-p package)
+    (package-install package)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
