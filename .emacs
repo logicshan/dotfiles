@@ -1,7 +1,25 @@
+; packages want to install
+(setq package-list '(exec-path-from-shell grep-a-lot haskell-mode tuareg caml))
+
+(setq package-archives
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+	("melpa" . "http://melpa.milkbox.net/packages/")))
+
 (package-initialize)
+
+; fetch the list of packages available
+(unless package-archive-contents
+  (package-refresh-cotents))
+; install the missing packages
+(dolist (package package-list)
+  (unless (package-installed-p package)
+    (package-install package)))
 
 (require 'grep-a-lot)
 (grep-a-lot-setup-keys)
+
+(when (memq window-system '(x ns))
+  (exec-path-from-shell-initialize))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -16,8 +34,7 @@
  '(inhibit-startup-screen t)
  '(initial-frame-alist (quote ((fullscreen . maximized))))
  '(menu-bar-mode nil)
- '(package-archives (quote (("gnu" . "http://elpa.gnu.org/packages/") ("melpa" . "http://melpa.milkbox.net/packages/"))))
- '(package-enable-at-startup nil)
+; '(package-enable-at-startup nil)
  '(tool-bar-mode nil)
  '(uniquify-buffer-name-style (quote post-forward) nil (uniquify)))
 (custom-set-faces
@@ -27,28 +44,16 @@
  ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono")))))
 
-(when (memq window-system '(x ns))
-  (exec-path-from-shell-initialize))
-
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 
 (add-to-list 'auto-mode-alist '("\\.m\\'" . miranda-mode))
 
 (autoload 'miranda-mode "miranda-mode"
                         "Major mode for editing Miranda scripts" t nil)
-
-(load (expand-file-name "~/quicklisp/slime-helper.el"))
+(let ((file (expand-file-name "~/quicklisp/slime-helper.el")))
+  (if (file-exists-p file)
+      (load file)))
 (setq inferior-lisp-program "sbcl")
-
-; packages want to install
-(setq package-list '(exec-path-from-shell grep-a-lot haskell-mode tuareg caml))
-; fetch the list of packages available
-(unless package-archive-contents
-  (package-refresh-cotents))
-; install the missing packages
-(dolist (package package-list)
-  (unless (package-installed-p package)
-    (package-install package)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
