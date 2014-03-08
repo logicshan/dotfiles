@@ -1,9 +1,9 @@
 ; packages want to install
-(setq package-list '(exec-path-from-shell grep-a-lot haskell-mode tuareg caml))
-
+(setq package-list '(exec-path-from-shell grep-a-lot haskell-mode s sml-mode tuareg caml))
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
-	("melpa" . "http://melpa.milkbox.net/packages/")))
+	("melpa" . "http://melpa.milkbox.net/packages/")
+	("marmalade" . "http://marmalade-repo.org/packages/")))
 
 (package-initialize)
 
