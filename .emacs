@@ -1,5 +1,5 @@
 ; packages want to install
-(setq package-list '(exec-path-from-shell grep-a-lot haskell-mode s sml-mode tuareg caml))
+(setq package-list '(exec-path-from-shell fsharp-mode dash auto-complete grep-a-lot haskell-mode popup pos-tip s sml-mode tuareg caml))
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
 	("melpa" . "http://melpa.milkbox.net/packages/")
@@ -42,7 +42,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono")))))
+; '(default ((t (:inherit nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
+ )
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 
