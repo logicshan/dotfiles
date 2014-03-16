@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for file in $*
+do
+  filename=${file%%.*}
+  sed -n 's/^> //p' ${filename}".lhs" > ${filename}".hs"
+done
