@@ -1,5 +1,6 @@
 ; packages want to install
-(setq package-list '(exec-path-from-shell fsharp-mode dash s pos-tip popup auto-complete popup grep-a-lot haskell-mode popup pos-tip s sml-mode tuareg caml))
+(setq package-list '(exec-path-from-shell fsharp-mode dash auto-complete grep-a-lot haskell-mode popup pos-tip rust-mode s sml-mode tuareg caml))
+
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
 	("melpa" . "http://melpa.milkbox.net/packages/")
