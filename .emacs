@@ -27,15 +27,18 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(blink-cursor-mode nil)
  '(column-number-mode t)
  '(haskell-mode-hook (quote (turn-on-haskell-decl-scan turn-on-haskell-indentation)))
  '(haskell-program-name "ghci")
  '(ido-enable-flex-matching t)
  '(ido-mode (quote both) nil (ido))
+ '(inhibit-startup-echo-area-message "shanning")
  '(inhibit-startup-screen t)
  '(initial-frame-alist (quote ((fullscreen . maximized))))
+ '(initial-scratch-message nil)
  '(menu-bar-mode nil)
-; '(package-enable-at-startup nil)
+ '(scroll-bar-mode nil)
  '(tool-bar-mode nil)
  '(uniquify-buffer-name-style (quote post-forward) nil (uniquify)))
 (custom-set-faces
@@ -43,7 +46,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
-; '(default ((t (:inherit nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
  )
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
@@ -63,6 +65,32 @@
 		  (cons (decode-char 'ucs #x1f300)
 			(decode-char 'ucs #x1f64f))
 		  "Segoe UI Symbol")
+
+(defun kid-cool-box (title begin end)
+  "Wrap the region with a cool box.
+The result is like this:
+,----------[ Title ]
+| This is the marked region
+| that will be boxed
+`----------
+"
+  (interactive "sTitle: \nr")
+  (setq end (copy-marker end t))
+  (save-excursion
+    (goto-char begin)
+    (unless (looking-back "^")
+      (insert "\n"))
+    (insert ",----------[ ")
+    (insert title)
+    (insert " ]\n")
+    (while (< (point) end)
+      (insert "| ")
+      (next-line)
+      (beginning-of-line))
+    (goto-char end)
+    (unless (looking-back "^")
+      (insert "\n"))
+    (insert "`----------\n")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
