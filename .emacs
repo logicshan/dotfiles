@@ -57,6 +57,13 @@
       (load file)))
 (setq inferior-lisp-program "sbcl")
 
+;; "Miscellaneous Symbols And Pictographs" U+1F300 - U+1F5FF
+;; "Emoticons"  U+1F600 - U+1F64F
+(set-fontset-font "fontset-default"
+		  (cons (decode-char 'ucs #x1f300)
+			(decode-char 'ucs #x1f64f))
+		  "Segoe UI Symbol")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun other-window-backward (&optional n)
