@@ -1,5 +1,5 @@
 ; packages want to install
-(setq package-list '(exec-path-from-shell fsharp-mode dash auto-complete grep-a-lot haskell-mode popup pos-tip rust-mode s sml-mode tuareg caml))
+(setq package-list '(ascii exec-path-from-shell fsharp-mode dash auto-complete grep-a-lot haskell-mode popup pos-tip rust-mode s sml-mode tuareg caml))
 
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
@@ -10,7 +10,7 @@
 
 ; fetch the list of packages available
 (unless package-archive-contents
-  (package-refresh-cotents))
+  (package-refresh-contents))
 ; install the missing packages
 (dolist (package package-list)
   (unless (package-installed-p package)
