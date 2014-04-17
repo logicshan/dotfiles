@@ -51,9 +51,13 @@
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 
 (add-to-list 'auto-mode-alist '("\\.m\\'" . miranda-mode))
-
 (autoload 'miranda-mode "miranda-mode"
-                        "Major mode for editing Miranda scripts" t nil)
+  "Major mode for editing Miranda scripts" t nil)
+
+(add-to-list 'auto-mode-alist '("\\.ott\\'" . ott-mode))
+(autoload 'ott-mode "ottmode"
+  "Major mode for editing Ott files." t nil)
+
 (let ((file (expand-file-name "~/quicklisp/slime-helper.el")))
   (if (file-exists-p file)
       (load file)))
@@ -65,32 +69,6 @@
 		  (cons (decode-char 'ucs #x1f300)
 			(decode-char 'ucs #x1f64f))
 		  "Segoe UI Symbol")
-
-(defun kid-cool-box (title begin end)
-  "Wrap the region with a cool box.
-The result is like this:
-,----------[ Title ]
-| This is the marked region
-| that will be boxed
-`----------
-"
-  (interactive "sTitle: \nr")
-  (setq end (copy-marker end t))
-  (save-excursion
-    (goto-char begin)
-    (unless (looking-back "^")
-      (insert "\n"))
-    (insert ",----------[ ")
-    (insert title)
-    (insert " ]\n")
-    (while (< (point) end)
-      (insert "| ")
-      (next-line)
-      (beginning-of-line))
-    (goto-char end)
-    (unless (looking-back "^")
-      (insert "\n"))
-    (insert "`----------\n")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -115,16 +93,107 @@ The result is like this:
   (scroll-behind (prefix-numeric-value n)))
 
 (global-set-key (kbd "C-q") 'scroll-n-lines-behind)
+(define-key minibuffer-local-map (kbd "C-q") 'quoted-insert)
 (global-set-key (kbd "C-z") 'scroll-n-lines-ahead)
 
-(defun point-to-top ()
-  "Put point on top line of window."
-  (interactive)
-  (move-to-window-line 0))
-(defun point-to-bottom ()
-  "Put point at beginning of last visible line."
-  (interactive)
-  (move-to-window-line -1))
+(defun read-only-if-symlink ()
+  (if (file-symlink-p buffer-file-name)
+      (progn
+	(setq buffer-read-only t)
+	(message "File is a symlink"))))
+(add-hook 'find-file-hooks 'read-only-if-symlink)
 
-(global-set-key (kbd "C-,") 'point-to-top)
-(global-set-key (kbd "C-.") 'point-to-bottom)
+(defun visit-target-instead ()
+  "Replace this buffer with a buffer visiting the link target."
+  (interactive)
+  (if buffer-file-name
+      (let ((target (file-symlink-p buffer-file-name)))
+	(if target
+	    (find-alternate-file target)
+	  (error "Not visiting a symlink")))
+    (error "Not visiting a file")))
+
+(defun clobber-symlink ()
+  "Replace symlink with a copy of the file."
+  (interactive)
+  (if buffer-file-name
+      (let ((target (file-symlink-p buffer-file-name)))
+	(if target
+	    (if (yes-or-no-p (format "Replace %s with %s"
+				     buffer-file-name
+				     target))
+		(progn
+		  (delete-file buffer-file-name)
+		  (write-file buffer-file-name)))
+	  (error "Not visiting a symlink")))
+    (error "Not visiting a file")))
+
+(defadvice switch-to-buffer (before existing-buffer
+				    activate compile)
+  "When interactive, switch to existing buffers only,
+unless given a prefix argument."
+  (interactive
+   (list (read-buffer "Switch to buffer: "
+		      (other-buffer)
+		      (null current-prefix-arg)))))
+
+(put 'scroll-up 'unscrollable t)
+(put 'scroll-down 'unscrollable t)
+(put 'scroll-left 'unscrollable t)
+(put 'scroll-right 'unscrollable t)
+
+(defvar unscroll-point (make-marker)
+  "Cursor position for next call to 'unscroll'.")
+(defvar unscroll-window-start (make-marker)
+  "Window start for next call to 'unscroll'.")
+(defvar unscroll-hscroll nil
+  "Hscroll for next call to 'unscroll'.")
+
+(defun unscroll-maybe-remember ()
+  (if (not (get last-command 'unscrollable))
+      (progn
+	(set-marker unscroll-point (point))
+	(set-marker unscroll-window-start (window-start))
+	(setq unscroll-hscroll (window-hscroll)))))
+
+(defun unscroll ()
+  "Revert to 'unscroll-point' and 'unscroll-window-start'."
+  (interactive)
+  (goto-char unscroll-point)
+  (set-window-start nil unscroll-window-start)
+  (set-window-hscroll nil unscroll-hscroll))
+
+(defadvice scroll-up (before remember-for-unscroll
+			     activate compile)
+  "Remember where we started from, for 'unscroll'."
+  (unscroll-maybe-remember))
+(defadvice scroll-down (before remember-for-unscroll
+			       activate compile)
+  "Remember where we started from, for 'unscroll'."
+  (unscroll-maybe-remember))
+(defadvice scroll-left (before remember-for-unscroll
+			       activate compile)
+  "Remember where we started from, for 'unscroll'."
+  (unscroll-maybe-remember))
+(defadvice scroll-right (before remember-for-unscroll
+				activate compile)
+  "Remember where we started from, for 'unscroll'."
+  (unscroll-maybe-remember))
+
+(require 'timestamp)
+
+(autoload 'refill-mode "refill"
+  "Refill minor mode."
+  t)
+(autoload 'showmsg-mode "showmsg"
+  "Showmsg minor mode."
+  t)
+(autoload 'quip-mode "quip"
+  "Quip major mode."
+  t)
+(autoload 'crossword "crossword"
+  "Create a new buffer with an empty crossword grid."
+  t)
+(autoload 'crossword-mode "crossword"
+  "Major mode for editing crossword puzzles."
+  t)
