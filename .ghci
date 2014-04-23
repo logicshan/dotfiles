@@ -1,3 +1,4 @@
+:set prompt "λ: "
 :m - Prelude
 :m + GOA
 setLambdabotHome "/home/shanning/.cabal/bin"
