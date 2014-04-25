@@ -4,8 +4,7 @@
   (setq user-emacs-directory "~/.emacs24.3.d/"))
 
 ; packages want to install
-(setq package-list '(ascii exec-path-from-shell haskell-mode rust-mode))
-
+(setq package-list '(ascii exec-path-from-shell geiser haskell-mode paredit quack rust-mode))
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
 	("melpa" . "http://melpa.milkbox.net/packages/")
@@ -31,7 +30,9 @@
  ;; If there is more than one, they won't work right.
  '(blink-cursor-mode nil)
  '(column-number-mode t)
- '(haskell-mode-hook (quote (turn-on-haskell-decl-scan turn-on-haskell-indentation)))
+ '(haskell-mode-hook
+   (quote
+    (turn-on-haskell-decl-scan turn-on-haskell-indentation)))
  '(haskell-program-name "ghci")
  '(ido-enable-flex-matching t)
  '(ido-mode (quote both) nil (ido))
@@ -39,6 +40,11 @@
  '(inhibit-startup-screen t)
  '(initial-scratch-message nil)
  '(menu-bar-mode nil)
+ '(scheme-mode-hook
+   (quote
+    (geiser-mode--maybe-activate
+     (lambda nil
+       (paredit-mode t)))))
  '(scroll-bar-mode nil)
  '(tool-bar-mode nil)
  '(uniquify-buffer-name-style (quote post-forward) nil (uniquify)))
