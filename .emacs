@@ -44,7 +44,12 @@
    (quote
     (geiser-mode--maybe-activate
      (lambda nil
-       (paredit-mode t)))))
+       (paredit-mode t)
+       (abbrev-mode t)
+       (show-paren-mode t)
+       (local-set-key (kbd "C-,") 'termify)
+       (local-set-key (kbd "C-c '") 'insert-middledot)
+       (local-set-key (kbd "C-c <right>") 'insert-rightarrow)))))
  '(scroll-bar-mode nil)
  '(tool-bar-mode nil)
  '(uniquify-buffer-name-style (quote post-forward) nil (uniquify)))
@@ -63,6 +68,33 @@
 		  (cons (decode-char 'ucs #x1f300)
 			(decode-char 'ucs #x1f64f))
 		  "Segoe UI Symbol")
+
+(defun termify ()
+  (interactive)
+  (save-excursion
+    (skip-chars-backward "^[:space:]\n(")
+    (insert-char #x2039))
+  (insert-char #x203a))
+
+(defun insert-lambda ()
+  "Insert λ."
+  (interactive)
+  (insert-char #x3bb))
+(add-hook 'geiser-repl-mode-hook
+	  (lambda ()
+	    (abbrev-mode t)
+	    (local-set-key (kbd "C-,") 'termify)
+	    (local-set-key (kbd "C-c \\") 'insert-lambda)
+	    (local-set-key (kbd "C-c '") 'insert-middledot)
+	    (local-set-key (kbd "C-c <right>") 'insert-rightarrow)))
+(defun insert-rightarrow ()
+  "Insert →."
+  (interactive)
+  (insert-char #x2192))
+(defun insert-middledot ()
+  "Insert ·."
+  (interactive)
+  (insert-char #xb7))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
