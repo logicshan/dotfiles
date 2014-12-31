@@ -30,9 +30,6 @@
  ;; If there is more than one, they won't work right.
  '(blink-cursor-mode nil)
  '(column-number-mode t)
- '(haskell-mode-hook
-   (quote
-    (turn-on-haskell-decl-scan turn-on-haskell-indentation)))
  '(haskell-program-name "ghci")
  '(ido-enable-flex-matching t)
  '(ido-mode (quote both) nil (ido))
@@ -95,6 +92,9 @@
   "Insert ·."
   (interactive)
   (insert-char #xb7))
+
+(add-hook 'haskell-mode-hook 'haskell-indent-mode)
+(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
