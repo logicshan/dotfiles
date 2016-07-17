@@ -1,0 +1,4 @@
+LIB "surf.lib";
+ring R = 0,(x,y),dp;
+ideal J = x^3-y^2;
+plot(J);
