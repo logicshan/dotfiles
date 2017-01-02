@@ -1,0 +1,127 @@
+(toggle-frame-maximized)
+
+;;------[ CoCoA-5 settings ]----------------------
+(setq cocoa5-emacs-dir
+    "/home/shanning/Downloads/cocoa-5.1/emacs/")
+(if (file-readable-p (concat cocoa5-emacs-dir "cocoa5.emacs"))
+    (load-file (concat cocoa5-emacs-dir "cocoa5.emacs")))
+
+;;------[ CoCoA-5 settings end ]------------------
+
+(load-file (let ((coding-system-for-read 'utf-8))
+                (shell-command-to-string "agda-mode locate")))
+
+(eval-after-load "quail/latin-ltx"
+  '(mapc (lambda (pair)
+	   (quail-defrule (car pair) (cadr pair) "TeX"))
+	 '(("\\bl" "𝕃") ("\\bs" "𝕊")
+	   ("\\bt" "𝕋") ("\\bv" "𝕍"))))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(agda2-program-args
+   (quote
+    ("--include-path=/home/shanning/Documents/agda-stdlib-0.12/src")))
+ '(tool-bar-mode nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+(defalias 'scroll-ahead 'scroll-up)
+(defalias 'scroll-behind 'scroll-down)
+
+(defun scroll-n-lines-ahead (&optional n)
+  "Scroll ahead N lines (1 by default)."
+  (interactive "P")
+  (scroll-ahead (prefix-numeric-value n)))
+(defun scroll-n-lines-behind (&optional n)
+  "Scroll behind N lines (1 by default)."
+  (interactive "P")
+  (scroll-behind (prefix-numeric-value n)))
+
+(global-set-key (kbd "C-q") 'scroll-n-lines-behind)
+(global-set-key (kbd "C-z") 'scroll-n-lines-ahead)
+
+
+;; Open .v files with Proof General's Coq mode
+(load "~/.emacs.d/lisp/PG/generic/proof-site")
+
+
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(package-initialize)
+
+;; Load company-coq when opening Coq files
+(add-hook 'coq-mode-hook #'company-coq-mode)
+
+;; Ssreflect support 
+(load-file "/home/shanning/Downloads/math-comp-mathcomp-1.6.1/mathcomp/ssreflect/pg-ssr.el")
+
+;; Run SageMath by M-x run-sage instead of M-x sage-shell:run-sage
+(sage-shell:define-alias)
+;; Turn on eldoc-mode
+(add-hook 'sage-shell-mode-hook #'eldoc-mode)
+(add-hook 'sage-shell:sage-mode-hook #'eldoc-mode)
+
+(add-hook 'sage-shell:sage-mode-hook 'ac-sage-setup)
+(add-hook 'sage-shell-mode-hook 'ac-sage-setup)
+
+(eval-after-load "latex"
+  '(mapc (lambda (key-cmd) (define-key LaTeX-mode-map (car key-cmd) (cdr key-cmd)))
+         `((,(kbd "C-c s c") . sage-shell-sagetex:compile-current-file)
+           (,(kbd "C-c s C") . sage-shell-sagetex:compile-file)
+           (,(kbd "C-c s r") . sage-shell-sagetex:run-latex-and-load-current-file)
+           (,(kbd "C-c s R") . sage-shell-sagetex:run-latex-and-load-file)
+           (,(kbd "C-c s l") . sage-shell-sagetex:load-current-file)
+           (,(kbd "C-c s L") . sage-shell-sagetex:load-file)
+           (,(kbd "C-c C-z") . sage-shell-edit:pop-to-process-buffer))))
+
+
+(setq load-path (cons "/home/shanning/Singular4/share/singular/emacs" load-path))
+(autoload 'singular "singular"
+  "Start Singular using default values." t)
+(autoload 'singular-other "singular"
+  "Ask for arguments and start Singular." t)
+
+;; turn on c++-mode for files ending in ".sing" and ".lib"
+(setq auto-mode-alist (cons '("\\.sing\\'" . c++-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.lib\\'" .  c++-mode) auto-mode-alist))
+;; turn-on fontification for c++-mode
+(add-hook 'c++-mode-hook
+         (function (lambda () (font-lock-mode 1))))
+;; turn on aut-new line and hungry-delete
+(add-hook 'c++-mode-hook
+          (function (lambda () (c-toggle-auto-hungry-state 1))))
+;; a handy function for customization
+(defun customize-face-at-point ()
+  "Customize face which point is at."
+  (interactive)
+  (let ((face (get-text-property (point) 'face)))
+    (if face
+        (customize-face face)
+      (message "No face defined at point"))))
+
+(ido-mode 1)
+(ido-everywhere 1)
+
+(require 'ido-ubiquitous)
+(ido-ubiquitous-mode 1)
+
+(require 'ido-yes-or-no)
+(ido-yes-or-no-mode 1)
+
+(require 'smex)
+(smex-initialize)
+
+(global-set-key (kbd "M-x") 'smex)
+(global-set-key (kbd "M-X") 'smex-major-mode-commands)
+;; This is the old M-x
+(global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
+
+(require 'window-numbering)
+(window-numbering-mode 1)
