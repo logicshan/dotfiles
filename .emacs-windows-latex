@@ -1,0 +1,184 @@
+;;设置默认读入文件编码
+(prefer-coding-system 'utf-8)
+
+;;设置写入文件编码
+(setq default-buffer-file-coding-system 'utf-8)
+
+;(add-to-list 'load-path
+;             "C:/emacs-24.5-bin-i686-mingw32/share/emacs/site-lisp/site-start.d")
+
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/"))
+(package-initialize)
+
+(require 'recentf)
+;; get rid of `find-file-read-only' and replace it with something
+;; more useful.
+(global-set-key (kbd "C-x C-r") 'ido-recentf-open)
+
+;; enable recent files mode.
+(recentf-mode t)
+
+; 50 files ought to be enough.
+(setq recentf-max-saved-items 50)
+
+(defun ido-recentf-open ()
+  "Use `ido-completing-read' to \\[find-file] a recent file"
+  (interactive)
+  (if (find-file (ido-completing-read "Find recent file: " recentf-list))
+      (message "Opening file...")
+    (message "Aborting")))
+
+
+
+(require 'smartparens-latex)
+;(sp-pair "[" nil :actions :rem)
+;(smartparens-global-mode t)
+
+(ido-mode 1)
+(ido-everywhere 1)
+
+(require 'ido-completing-read+)
+(ido-ubiquitous-mode 1)
+
+(require 'ido-yes-or-no)
+(ido-yes-or-no-mode 1)
+
+(global-company-mode 1)
+
+(add-to-list 'company-backends 'company-math-symbols-unicode)
+(add-to-list 'company-backends 'company-latex-commands)
+(add-to-list 'company-backends 'company-math-symbols-latex)
+
+;(require 'expand-region)
+(load "expand-region-autoloads")
+(global-set-key (kbd "C-=") 'er/expand-region)
+
+(require 'smex)
+(smex-initialize)
+
+(global-set-key (kbd "M-x") 'smex)
+(global-set-key (kbd "M-X") 'smex-major-mode-commands)
+;; This is the old M-x
+(global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
+
+
+(require 'window-numbering)
+(window-numbering-mode 1)
+
+(require 'yasnippet)
+(yas-global-mode 1)
+
+(load "auctex.el" nil t t)
+(load "preview-latex.el" nil t t)
+;(if (string-equal system-type "windows-nt")
+;    (require 'tex-mik))
+
+
+(mapc (lambda (mode)
+	(add-hook 'LaTeX-mode-hook mode))
+      (list 'auto-fill-mode
+            'LaTeX-math-mode
+            'turn-on-reftex
+	    'smartparens-mode
+            'linum-mode))
+
+(eval-after-load "tex"
+  '(add-to-list 'TeX-command-list
+        '("Arara" "arara %s" TeX-run-TeX nil t :help "Run Arara.")))
+
+(add-hook 'LaTeX-mode-hook
+          (lambda ()
+            (setq TeX-auto-untabify t     ; remove all tabs before saving
+                  TeX-engine 'xetex       ; use xelatex default
+                  TeX-show-compilation t) ; display compilation windows
+            (TeX-global-PDF-mode t)       ; PDF mode enable, not plain
+            (setq TeX-save-query nil)
+            (imenu-add-menubar-index)
+	    ;; forward and inverse search
+	    (setq TeX-source-correlate-mode t)
+	    (setq TeX-source-correlate-method 'synctex)
+	    (setq TeX-source-correlate-start-server t)
+	    (assq-delete-all 'output-pdf TeX-view-program-selection)
+	    (setq TeX-view-program-list
+		  '(("Sumatra PDF" ("\"C:/bin/SumatraPDF.exe\" -reuse-instance"
+				    (mode-io-correlate " -forward-search %b %n ") " %o"))))
+	    (add-to-list 'TeX-view-program-selection   '(output-pdf "Sumatra PDF"))
+;	    (sp-local-pair LaTeX-mode "[" nil :actions :rem)
+            (define-key LaTeX-mode-map (kbd "TAB") 'TeX-complete-symbol)
+	    (define-key LaTeX-mode-map (kbd "M-l") 'forward-char)))
+
+(defalias 'scroll-ahead 'scroll-up)
+(defalias 'scroll-behind 'scroll-down)
+
+(defun scroll-n-lines-ahead (&optional n)
+  "Scroll ahead N lines (1 by default)."
+  (interactive "P")
+  (scroll-ahead (prefix-numeric-value n)))
+(defun scroll-n-lines-behind (&optional n)
+  "Scroll behind N lines (1 by default)."
+  (interactive "P")
+  (scroll-behind (prefix-numeric-value n)))
+
+(global-set-key (kbd "C-q") 'scroll-n-lines-behind)
+(define-key minibuffer-local-map (kbd "C-q") 'quoted-insert)
+(global-set-key (kbd "C-z") 'scroll-n-lines-ahead)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(TeX-command-BibTeX "Biber")
+ '(TeX-command-list
+   (quote
+    (("TeX" "%(PDF)%(tex) %(file-line-error) %(extraopts) %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil
+      (plain-tex-mode texinfo-mode ams-tex-mode)
+      :help "Run plain TeX")
+     ("LaTeX" "%`%l%(mode)%' %t" TeX-run-TeX nil
+      (latex-mode doctex-mode)
+      :help "Run LaTeX")
+     ("Makeinfo" "makeinfo %(extraopts) %t" TeX-run-compile nil
+      (texinfo-mode)
+      :help "Run Makeinfo with Info output")
+     ("Makeinfo HTML" "makeinfo %(extraopts) --html %t" TeX-run-compile nil
+      (texinfo-mode)
+      :help "Run Makeinfo with HTML output")
+     ("AmSTeX" "amstex %(PDFout) %(extraopts) %`%S%(mode)%' %t" TeX-run-TeX nil
+      (ams-tex-mode)
+      :help "Run AMSTeX")
+     ("ConTeXt" "%(cntxcom) --once --texutil %(extraopts) %(execopts)%t" TeX-run-TeX nil
+      (context-mode)
+      :help "Run ConTeXt once")
+     ("ConTeXt Full" "%(cntxcom) %(extraopts) %(execopts)%t" TeX-run-TeX nil
+      (context-mode)
+      :help "Run ConTeXt until completion")
+     ("BibTeX" "bibtex %s" TeX-run-BibTeX nil t :help "Run BibTeX")
+     ("Biber" "biber %s.bcf" TeX-run-BibTeX nil t :help "Run Biber")
+     ("View" "%V" TeX-run-discard-or-function t t :help "Run Viewer")
+     ("Print" "%p" TeX-run-command t t :help "Print the file")
+     ("Queue" "%q" TeX-run-background nil t :help "View the printer queue" :visible TeX-queue-command)
+     ("File" "%(o?)dvips %d -o %f " TeX-run-dvips t t :help "Generate PostScript file")
+     ("Dvips" "%(o?)dvips %d -o %f " TeX-run-dvips nil t :help "Convert DVI file to PostScript")
+     ("Ps2pdf" "ps2pdf %f" TeX-run-ps2pdf nil t :help "Convert PostScript file to PDF")
+     ("Index" "makeindex %s" TeX-run-index nil t :help "Run makeindex to create index file")
+     ("Xindy" "texindy %s" TeX-run-command nil t :help "Run xindy to create index file")
+     ("Check" "lacheck %s" TeX-run-compile nil
+      (latex-mode)
+      :help "Check LaTeX file for correctness")
+     ("ChkTeX" "chktex -v6 %s" TeX-run-compile nil
+      (latex-mode)
+      :help "Check LaTeX file for common mistakes")
+     ("Spell" "(TeX-ispell-document \"\")" TeX-run-function nil t :help "Spell-check the document")
+     ("Clean" "TeX-clean" TeX-run-function nil t :help "Delete generated intermediate files")
+     ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files")
+     ("Other" "" TeX-run-command t t :help "Run an arbitrary command"))))
+ '(TeX-parse-self t)
+ '(inhibit-startup-screen t)
+ '(tool-bar-mode nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

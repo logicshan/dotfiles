@@ -1,55 +1,34 @@
-(if (> emacs-minor-version 3)
-    (toggle-frame-fullscreen) ; This is bound to f11 in Emacs 24.4
-  (setq initial-frame-alist '((fullscreen . maximized)))
-  (setq user-emacs-directory "~/.emacs24.3.d/"))
+(toggle-frame-maximized)
 
-; packages want to install
-(setq package-list '(ascii exec-path-from-shell geiser haskell-mode paredit quack rust-mode))
-(setq package-archives
-      '(("gnu" . "http://elpa.gnu.org/packages/")
-	("melpa" . "http://melpa.milkbox.net/packages/")
-	("marmalade" . "http://marmalade-repo.org/packages/")))
+(add-to-list 'load-path "/home/shanning/test/cubicaltt")
+(autoload 'cubicaltt-mode "cubicaltt" "cubical editing mode" t)
+(setq auto-mode-alist (append auto-mode-alist '(("\\.ctt$" . cubicaltt-mode))))
 
-(package-initialize)
 
-; fetch the list of packages available
-(unless package-archive-contents
-  (package-refresh-contents))
-; install the missing packages
-(dolist (package package-list)
-  (unless (package-installed-p package)
-    (package-install package)))
+(load-file (let ((coding-system-for-read 'utf-8))
+                (shell-command-to-string "agda-mode locate")))
 
-(when (memq window-system '(x ns))
-  (exec-path-from-shell-initialize))
-
+(eval-after-load "quail/latin-ltx"
+  '(mapc (lambda (pair)
+	   (quail-defrule (car pair) (cadr pair) "TeX"))
+	 '(("\\bl" "𝕃") ("\\bs" "𝕊")
+	   ("\\bt" "𝕋") ("\\bv" "𝕍"))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(blink-cursor-mode nil)
- '(column-number-mode t)
- '(haskell-program-name "ghci")
- '(ido-enable-flex-matching t)
- '(ido-mode (quote both) nil (ido))
- '(inhibit-startup-echo-area-message "shanning")
+ '(LaTeX-command "latex")
+ '(coq-compiler "coqtop")
+ '(coq-prog-name "coqtop")
+ '(gap-executable "/home/shanning/Development/gap4r8/bin/gap.sh")
+ '(gap-start-options (quote ("-f" "-b" "-m" "2m" "-E")))
  '(inhibit-startup-screen t)
- '(initial-scratch-message nil)
- '(menu-bar-mode nil)
- '(scheme-mode-hook
+ '(package-selected-packages
    (quote
-    (geiser-mode--maybe-activate
-     (lambda nil
-       (paredit-mode t)
-       (abbrev-mode t)
-       (show-paren-mode t)
-       (local-set-key (kbd "C-,") 'termify)
-       (local-set-key (kbd "C-c '") 'insert-middledot)
-       (local-set-key (kbd "C-c <right>") 'insert-rightarrow)))))
- '(scroll-bar-mode nil)
- '(tool-bar-mode nil)
- '(uniquify-buffer-name-style (quote post-forward) nil (uniquify)))
+    (z3-mode markdown-preview-mode markdown-preview-eww inf-ruby racket-mode redprl fill-column-indicator window-numbering unicode-fonts smex ido-yes-or-no haskell-mode gnuplot-mode gap-mode flycheck f dash-functional company-coq auto-complete-sage auctex async)))
+ '(redprl-command "/home/shanning/Documents/sml-redprl/bin/redprl")
+ '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -57,54 +36,9 @@
  ;; If there is more than one, they won't work right.
  )
 
-(add-to-list 'load-path "~/.emacs.d/site-lisp/")
-
-;; "Miscellaneous Symbols And Pictographs" U+1F300 - U+1F5FF
-;; "Emoticons"  U+1F600 - U+1F64F
-(set-fontset-font "fontset-default"
-		  (cons (decode-char 'ucs #x1f300)
-			(decode-char 'ucs #x1f64f))
-		  "Segoe UI Symbol")
-
-(defun termify ()
-  (interactive)
-  (save-excursion
-    (skip-chars-backward "^[:space:]\n(")
-    (insert-char #x2039))
-  (insert-char #x203a))
-
-(defun insert-lambda ()
-  "Insert λ."
-  (interactive)
-  (insert-char #x3bb))
-(add-hook 'geiser-repl-mode-hook
-	  (lambda ()
-	    (abbrev-mode t)
-	    (local-set-key (kbd "C-,") 'termify)
-	    (local-set-key (kbd "C-c \\") 'insert-lambda)
-	    (local-set-key (kbd "C-c '") 'insert-middledot)
-	    (local-set-key (kbd "C-c <right>") 'insert-rightarrow)))
-(defun insert-rightarrow ()
-  "Insert →."
-  (interactive)
-  (insert-char #x2192))
-(defun insert-middledot ()
-  "Insert ·."
-  (interactive)
-  (insert-char #xb7))
-
-(add-hook 'haskell-mode-hook 'haskell-indent-mode)
-(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun other-window-backward (&optional n)
-  "Select Nth previous window."
-  (interactive "P")
-  (other-window (- (prefix-numeric-value n))))
-
-(global-set-key (kbd "C-x C-n") 'other-window)
-(global-set-key (kbd "C-x C-p") 'other-window-backward)
+(require 'agda-input)
+(add-hook 'haskell-mode-hook
+	  (lambda () (set-input-method "Agda")))
 
 (defalias 'scroll-ahead 'scroll-up)
 (defalias 'scroll-behind 'scroll-down)
@@ -119,21 +53,79 @@
   (scroll-behind (prefix-numeric-value n)))
 
 (global-set-key (kbd "C-q") 'scroll-n-lines-behind)
-(define-key minibuffer-local-map (kbd "C-q") 'quoted-insert)
 (global-set-key (kbd "C-z") 'scroll-n-lines-ahead)
 
-(autoload 'refill-mode "refill"
-  "Refill minor mode."
-  t)
-(autoload 'showmsg-mode "showmsg"
-  "Showmsg minor mode."
-  t)
-(autoload 'quip-mode "quip"
-  "Quip major mode."
-  t)
-(autoload 'crossword "crossword"
-  "Create a new buffer with an empty crossword grid."
-  t)
-(autoload 'crossword-mode "crossword"
-  "Major mode for editing crossword puzzles."
-  t)
+
+;; Open .v files with Proof General's Coq mode
+;(load "~/.emacs.d/lisp/PG/generic/proof-site")
+
+
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(package-initialize)
+
+;; Install required/optional packages for lean-mode
+(defvar lean-mode-required-packages
+  '(company dash dash-functional flycheck f
+            fill-column-indicator s))
+(let ((need-to-refresh t))
+  (dolist (p lean-mode-required-packages)
+    (when (not (package-installed-p p))
+      (when need-to-refresh
+        (package-refresh-contents)
+        (setq need-to-refresh nil))
+      (package-install p))))
+
+;; math input method setup
+(require 'math-symbol-lists)
+(quail-define-package "math" "UTF-8" "Ω" t)
+(quail-define-rules ; add whatever extra rules you want to define here...
+ ("\\from"    #X2190)
+ ("\\to"      #X2192)
+ ("\\lhd"     #X22B2)
+ ("\\rhd"     #X22B3)
+ ("\\unlhd"   #X22B4)
+ ("\\unrhd"   #X22B5))
+(mapc (lambda (x)
+        (if (cddr x)
+            (quail-defrule (cadr x) (car (cddr x)))))
+      (append math-symbol-list-basic math-symbol-list-extended))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(eval-after-load "latex"
+  '(mapc (lambda (key-cmd) (define-key LaTeX-mode-map (car key-cmd) (cdr key-cmd)))
+         `((,(kbd "C-c s c") . sage-shell-sagetex:compile-current-file)
+           (,(kbd "C-c s C") . sage-shell-sagetex:compile-file)
+           (,(kbd "C-c s r") . sage-shell-sagetex:run-latex-and-load-current-file)
+           (,(kbd "C-c s R") . sage-shell-sagetex:run-latex-and-load-file)
+           (,(kbd "C-c s l") . sage-shell-sagetex:load-current-file)
+           (,(kbd "C-c s L") . sage-shell-sagetex:load-file)
+           (,(kbd "C-c C-z") . sage-shell-edit:pop-to-process-buffer))))
+
+
+
+(ido-mode 1)
+(ido-everywhere 1)
+
+(require 'ido-completing-read+)
+(ido-ubiquitous-mode 1)
+
+(require 'ido-yes-or-no)
+(ido-yes-or-no-mode 1)
+
+(require 'smex)
+(smex-initialize)
+
+(global-set-key (kbd "M-x") 'smex)
+(global-set-key (kbd "M-X") 'smex-major-mode-commands)
+;; This is the old M-x
+(global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
+
+(require 'window-numbering)
+(window-numbering-mode 1)
+
+(add-hook 'gap-mode-hook
+	  (lambda ()
+	    (define-key gap-mode-map (kbd "C-c C-n") 'gap-eval-last-statement)
+	    (define-key gap-mode-map (kbd "M-n") 'gap-completion)))
